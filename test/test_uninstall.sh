@@ -1,23 +1,18 @@
 #!/usr/bin/env bash
 
+# Ensure we can execute standalone
+[ -n "${TFENV_ROOT}" ] || export TFENV_ROOT="$(cd "$(dirname "${0}")/.." && pwd)";
+[ -n "${TFENV_HELPERS}" ] || source "${TFENV_ROOT}/lib/helpers.sh";
+
 declare -a errors
 
 function error_and_proceed() {
-  errors+=("${1}")
-  echo -e "tfenv: ${0}: Test Failed: ${1}" >&2
+  errors+=("${1}");
+  log 'warn' "tfenv: ${0}: Test Failed: ${1}";
 }
-
-function log error() {
-  echo -e "tfenv: ${0}: ${1}" >&2
-  exit 1
-}
-
-[ -n "${TFENV_DEBUG}" ] && set -x
-source "$(dirname "${0}")/helpers.sh" \
-  || log error "Failed to load test helpers: $(dirname "${0}")/helpers.sh"
 
 echo "### Uninstall local versions"
-cleanup || log error "Cleanup failed?!"
+cleanup || log 'error' "Cleanup failed?!"
 
 v="0.11.15-oci"
 (
@@ -34,7 +29,7 @@ v="0.9.1"
 ) || error_and_proceed "Uninstall of version "${v}" failed"
 
 echo "### Uninstall latest version"
-cleanup || log error "Cleanup failed?!"
+cleanup || log 'error' "Cleanup failed?!"
 
 v="$(tfenv list-remote | head -n 1)"
 (
@@ -44,7 +39,7 @@ v="$(tfenv list-remote | head -n 1)"
 ) || error_and_proceed "Uninstalling latest version ${v}"
 
 echo "### Uninstall latest version with Regex"
-cleanup || log error "Cleanup failed?!"
+cleanup || log 'error' "Cleanup failed?!"
 
 v="$(tfenv list-remote | grep 0.8 | head -n 1)"
 (
@@ -54,12 +49,12 @@ v="$(tfenv list-remote | grep 0.8 | head -n 1)"
 ) || error_and_proceed "Uninstalling latest version "${v}" with Regex"
 
 if [ "${#errors[@]}" -gt 0 ]; then
-  echo -e "\033[0;31m===== The following list tests failed =====\033[0;39m" >&2
+  echo -e "===== The following list tests failed =====" >&2
   for error in "${errors[@]}"; do
     echo -e "\t${error}"
   done
   exit 1
 else
-  echo -e "\033[0;32mAll list tests passed.\033[0;39m"
+  echo -e "All list tests passed."
 fi;
 exit 0

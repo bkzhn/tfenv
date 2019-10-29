@@ -10,7 +10,8 @@ function _log_exception() {
 
     log 'error' "Logging Exception: ${@}";
   );
-}
+};
+export -f _log_exception;
 
 function log() {
   local date_format="${BASHLOG_DATE_FORMAT:-+%F %T}";
@@ -103,7 +104,7 @@ function log() {
   local norm="${colours['DEFAULT']}";
   local colour="${colours[${upper}]:-\033[31m}";
 
-  local std_line="${colour}${date} [${upper}] ${line}${norm}";
+  local std_line="${colour}${date} [${upper}] ${0}: ${line}${norm}";
 
   # Standard Output (Pretty)
   case "${level}" in
@@ -126,17 +127,18 @@ function log() {
       log 'error' "Undefined log level trying to log: ${@}";
       ;;
   esac
-}
+};
+export -f log;
 
 declare prev_cmd="null";
 declare this_cmd="null";
 trap 'prev_cmd=$this_cmd; this_cmd=$BASH_COMMAND' DEBUG \
   && log debug 'DEBUG trap set' \
-  || log error 'DEBUG trap failed to set';
+  || log 'error' 'DEBUG trap failed to set';
 
 # This is an option if you want to log every single command executed,
 # but it will significantly impact script performance and unit tests will fail
 
 #trap 'prev_cmd=$this_cmd; this_cmd=$BASH_COMMAND; log debug $this_cmd' DEBUG \
 #  && log debug 'DEBUG trap set' \
-#  || log error 'DEBUG trap failed to set';
+#  || log 'error' 'DEBUG trap failed to set';

@@ -1,20 +1,15 @@
 #!/usr/bin/env bash
 
+# Ensure we can execute standalone
+[ -n "${TFENV_ROOT}" ] || export TFENV_ROOT="$(cd "$(dirname "${0}")/.." && pwd)";
+[ -n "${TFENV_HELPERS}" ] || source "${TFENV_ROOT}/lib/helpers.sh";
+
 declare -a errors
 
 function error_and_proceed() {
-  errors+=("${1}")
-  echo -e "tfenv: Test Failed: ${1}" >&2
+  errors+=("${1}");
+  log 'warn' "tfenv: ${0}: Test Failed: ${1}";
 }
-
-function log error() {
-  echo -e "tfenv: ${1}" >&2
-  exit 1
-}
-
-[ -n "${TFENV_DEBUG}" ] && set -x
-source "$(dirname "${0}")/helpers.sh" \
-  || log error "Failed to load test helpers: $(dirname "${0}")/helpers.sh"
 
 TFENV_BIN_DIR="/tmp/tfenv-test"
 rm -rf "${TFENV_BIN_DIR}" && mkdir "${TFENV_BIN_DIR}"
@@ -22,18 +17,18 @@ ln -s "${PWD}"/bin/* "${TFENV_BIN_DIR}"
 export PATH="${TFENV_BIN_DIR}:${PATH}"
 
 echo "### Test supporting symlink"
-cleanup || log error "Cleanup failed?!"
+cleanup || log 'error' "Cleanup failed?!"
 tfenv install 0.8.2 || error_and_proceed "Install failed"
 tfenv use 0.8.2 || error_and_proceed "Use failed"
 check_version 0.8.2 || error_and_proceed "Version check failed"
 
 if [ "${#errors[@]}" -gt 0 ]; then
-  echo -e "\033[0;31m===== The following symlink tests failed =====\033[0;39m" >&2
+  echo -e "===== The following symlink tests failed =====" >&2
   for error in "${errors[@]}"; do
     echo -e "\t${error}"
   done
   exit 1
 else
-  echo -e "\033[0;32mAll symlink tests passed.\033[0;39m"
+  echo -e "All symlink tests passed."
 fi;
 exit 0
