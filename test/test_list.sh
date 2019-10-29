@@ -7,17 +7,17 @@ function error_and_proceed() {
   echo -e "tfenv: ${0}: Test Failed: ${1}" >&2
 }
 
-function error_and_die() {
+function log error() {
   echo -e "tfenv: ${0}: ${1}" >&2
   exit 1
 }
 
 [ -n "${TFENV_DEBUG}" ] && set -x
 source "$(dirname "${0}")/helpers.sh" \
-  || error_and_die "Failed to load test helpers: $(dirname "${0}")/helpers.sh"
+  || log error "Failed to load test helpers: $(dirname "${0}")/helpers.sh"
 
 echo "### List local versions"
-cleanup || error_and_die "Cleanup failed?!"
+cleanup || log error "Cleanup failed?!"
 
 for v in 0.7.2 0.7.13 0.9.1 0.9.2 0.9.11; do
   tfenv install "${v}" || error_and_proceed "Install of version ${v} failed"

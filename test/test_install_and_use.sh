@@ -7,17 +7,17 @@ function error_and_proceed() {
   echo -e "tfenv: ${0}: Test Failed: ${1}" >&2
 }
 
-function error_and_die() {
+function log error() {
   echo -e "tfenv: ${0}: ${1}" >&2
   exit 1
 }
 
 [ -n "${TFENV_DEBUG}" ] && set -x
 source "$(dirname "${0}")/helpers.sh" \
-  || error_and_die "Failed to load test helpers: $(dirname ${0})/helpers.sh"
+  || log error "Failed to load test helpers: $(dirname ${0})/helpers.sh"
 
 echo "### Install latest version"
-cleanup || error_and_die "Cleanup failed?!"
+cleanup || log error "Cleanup failed?!"
 
 v="$(tfenv list-remote | grep -e "^[0-9]\+\.[0-9]\+\.[0-9]\+$" | head -n 1)"
 (
@@ -26,7 +26,7 @@ v="$(tfenv list-remote | grep -e "^[0-9]\+\.[0-9]\+\.[0-9]\+$" | head -n 1)"
 ) || error_and_proceed "Installing latest version ${v}"
 
 echo "### Install latest possibly-unstable version"
-cleanup || error_and_die "Cleanup failed?!"
+cleanup || log error "Cleanup failed?!"
 
 v="$(tfenv list-remote | head -n 1)"
 (
@@ -35,7 +35,7 @@ v="$(tfenv list-remote | head -n 1)"
 ) || error_and_proceed "Installing latest possibly-unstable version ${v}"
 
 echo "### Install latest alpha"
-cleanup || error_and_die "Cleanup failed?!"
+cleanup || log error "Cleanup failed?!"
 
 v="$(tfenv list-remote | grep 'alpha' | head -n 1)"
 (
@@ -44,7 +44,7 @@ v="$(tfenv list-remote | grep 'alpha' | head -n 1)"
 ) || error_and_proceed "Installing latest alpha ${v}"
 
 echo "### Install latest beta"
-cleanup || error_and_die "Cleanup failed?!"
+cleanup || log error "Cleanup failed?!"
 
 v="$(tfenv list-remote | grep 'beta' | head -n 1)"
 (
@@ -53,7 +53,7 @@ v="$(tfenv list-remote | grep 'beta' | head -n 1)"
 ) || error_and_proceed "Installing latest beta ${v}"
 
 echo "### Install latest rc"
-cleanup || error_and_die "Cleanup failed?!"
+cleanup || log error "Cleanup failed?!"
 
 v="$(tfenv list-remote | grep 'rc' | head -n 1)"
 (
@@ -62,7 +62,7 @@ v="$(tfenv list-remote | grep 'rc' | head -n 1)"
 ) || error_and_proceed "Installing latest rc ${v}"
 
 echo "### Install latest possibly-unstable version from 0.11"
-cleanup || error_and_die "Cleanup failed?!"
+cleanup || log error "Cleanup failed?!"
 
 v="$(tfenv list-remote | grep '^0\.11\.' | head -n 1)"
 (
@@ -71,7 +71,7 @@ v="$(tfenv list-remote | grep '^0\.11\.' | head -n 1)"
 ) || error_and_proceed "Installing latest possibly-unstable version from 0.11: ${v}"
 
 echo "### Install 0.11.15-oci"
-cleanup || error_and_die "Cleanup failed?!"
+cleanup || log error "Cleanup failed?!"
 
 v="0.11.15-oci"
 (
@@ -80,7 +80,7 @@ v="0.11.15-oci"
 ) || error_and_proceed "Installing version ${v}"
 
 echo "### Install latest version with Regex"
-cleanup || error_and_die "Cleanup failed?!"
+cleanup || log error "Cleanup failed?!"
 
 v="0.8.8"
 (
@@ -89,7 +89,7 @@ v="0.8.8"
 ) || error_and_proceed "Installing latest version ${v} with Regex"
 
 echo "### Install specific version"
-cleanup || error_and_die "Cleanup failed?!"
+cleanup || log error "Cleanup failed?!"
 
 v="0.7.13"
 (
@@ -98,7 +98,7 @@ v="0.7.13"
 ) || error_and_proceed "Installing specific version ${v}"
 
 echo "### Install specific .terraform-version"
-cleanup || error_and_die "Cleanup failed?!"
+cleanup || log error "Cleanup failed?!"
 
 v="0.9.1"
 echo "${v}" > ./.terraform-version
@@ -108,7 +108,7 @@ echo "${v}" > ./.terraform-version
 ) || error_and_proceed "Installing .terraform-version ${v}"
 
 echo "### Install latest:<regex> .terraform-version"
-cleanup || error_and_die "Cleanup failed?!"
+cleanup || log error "Cleanup failed?!"
 
 v="$(tfenv list-remote | grep -e '^0.8' | head -n 1)"
 echo "latest:^0.8" > ./.terraform-version
@@ -118,7 +118,7 @@ echo "latest:^0.8" > ./.terraform-version
 ) || error_and_proceed "Installing .terraform-version ${v}"
 
 echo "### Install with ${HOME}/.terraform-version"
-cleanup || error_and_die "Cleanup failed?!"
+cleanup || log error "Cleanup failed?!"
 
 if [ -f "${HOME}/.terraform-version" ]; then
   mv "${HOME}/.terraform-version" "${HOME}/.terraform-version.bup"
@@ -150,7 +150,7 @@ if [ -f "${HOME}/.terraform-version.bup" ]; then
 fi
 
 echo "### Install invalid specific version"
-cleanup || error_and_die "Cleanup failed?!"
+cleanup || log error "Cleanup failed?!"
 
 v="9.9.9"
 expected_error_message="No versions matching '${v}' found in remote"
@@ -158,7 +158,7 @@ expected_error_message="No versions matching '${v}' found in remote"
   && error_and_proceed "Installing invalid version ${v}"
 
 echo "### Install invalid latest:<regex> version"
-cleanup || error_and_die "Cleanup failed?!"
+cleanup || log error "Cleanup failed?!"
 
 v="latest:word"
 expected_error_message="No versions matching '${v}' found in remote"

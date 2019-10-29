@@ -7,17 +7,17 @@ function error_and_proceed() {
   echo -e "tfenv: ${0}: Test Failed: ${1}" >&2
 }
 
-function error_and_die() {
+function log error() {
   echo -e "tfenv: ${0}: ${1}" >&2
   exit 1
 }
 
 [ -n "${TFENV_DEBUG}" ] && set -x
 source "$(dirname "${0}")/helpers.sh" \
-  || error_and_die "Failed to load test helpers: $(dirname "${0}")/helpers.sh"
+  || log error "Failed to load test helpers: $(dirname "${0}")/helpers.sh"
 
 echo "### Uninstall local versions"
-cleanup || error_and_die "Cleanup failed?!"
+cleanup || log error "Cleanup failed?!"
 
 v="0.11.15-oci"
 (
@@ -34,7 +34,7 @@ v="0.9.1"
 ) || error_and_proceed "Uninstall of version "${v}" failed"
 
 echo "### Uninstall latest version"
-cleanup || error_and_die "Cleanup failed?!"
+cleanup || log error "Cleanup failed?!"
 
 v="$(tfenv list-remote | head -n 1)"
 (
@@ -44,7 +44,7 @@ v="$(tfenv list-remote | head -n 1)"
 ) || error_and_proceed "Uninstalling latest version ${v}"
 
 echo "### Uninstall latest version with Regex"
-cleanup || error_and_die "Cleanup failed?!"
+cleanup || log error "Cleanup failed?!"
 
 v="$(tfenv list-remote | grep 0.8 | head -n 1)"
 (

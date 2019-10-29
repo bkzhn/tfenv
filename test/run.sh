@@ -19,12 +19,12 @@ for t in ${targets}; do
 done
 
 if [ "${#errors[@]}" -ne 0 ];then
-  echo -e "\033[0;31m===== The following test suites failed =====\033[0;39m" >&2
+  log 'error' '===== The following test suites failed ====='
   for error in "${errors[@]}"; do
-    echo -e "\t${error}" >&2
+    log 'error' "\t${error}" >&2
   done
   exit 1
 else
-  echo -e "\033[0;32mAll test suites passed.\033[0;39m"
+  log 'info' 'All test suites passed.'
 fi
 exit 0

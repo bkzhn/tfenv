@@ -1,17 +1,20 @@
 #!/usr/bin/env bash
 
-function error_and_die() {
-  echo -e "tfenv: $(basename ${0}): \033[0;31m[ERROR] ${1}\033[0;39m" >&2
-  exit 1
-}
+export DEBUG="${TFENV_DEBUG}";
+source "${TFENV_ROOT}/libexec/bashlog";
 
-function warn_and_continue() {
-  echo -e "tfenv: $(basename ${0}): \033[0;33m[WARN] ${1}\033[0;39m" >&2
-}
-
-function info() {
-  echo -e "\033[0;32m[INFO] ${1}\033[0;39m"
-}
+#function log error() {
+#  echo -e "tfenv: $(basename ${0}): \033[0;31m[ERROR] ${1}\033[0;39m" >&2
+#  exit 1
+#}
+#
+#function warn_and_continue() {
+#  echo -e "tfenv: $(basename ${0}): \033[0;33m[WARN] ${1}\033[0;39m" >&2
+#}
+#
+#function info() {
+#  echo -e "\033[0;32m[INFO] ${1}\033[0;39m"
+#}
 
 # Curl wrapper to switch TLS option for each OS
 function curlw () {

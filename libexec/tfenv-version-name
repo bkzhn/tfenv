@@ -6,7 +6,7 @@ set -e
 source "${TFENV_ROOT}/libexec/helpers"
 
 [ -d "${TFENV_ROOT}/versions" ] \
-  || error_and_die "No versions of terraform installed. Please install one with: tfenv install"
+  || log error "No versions of terraform installed. Please install one with: tfenv install"
 
 TFENV_VERSION_FILE="$(tfenv-version-file)"
 TFENV_VERSION="$(cat "${TFENV_VERSION_FILE}" || true)"
@@ -18,12 +18,12 @@ if [[ "${TFENV_VERSION}" =~ ^latest.*$ ]]; then
     | grep -e "${regex}" \
     | head -n 1
   )"
-  [ -n "${version}" ] || error_and_die "No installed versions of terraform matched '${TFENV_VERSION}'"
+  [ -n "${version}" ] || log error "No installed versions of terraform matched '${TFENV_VERSION}'"
   TFENV_VERSION="${version}"
 fi
 
 [ -z "${TFENV_VERSION}" ] \
-  && error_and_die "Version could not be resolved (set by ${TFENV_VERSION_FILE} or tfenv use <version>)"
+  && log error "Version could not be resolved (set by ${TFENV_VERSION_FILE} or tfenv use <version>)"
 
 version_exists() {
   local version="${1}"
@@ -33,5 +33,5 @@ version_exists() {
 if version_exists "${TFENV_VERSION}"; then
   echo "${TFENV_VERSION}"
 else
-  error_and_die "version '${TFENV_VERSION}' is not installed (set by ${TFENV_VERSION_FILE})"
+  log error "version '${TFENV_VERSION}' is not installed (set by ${TFENV_VERSION_FILE})"
 fi
