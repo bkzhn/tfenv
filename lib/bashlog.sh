@@ -104,7 +104,12 @@ function log() {
   local norm="${colours['DEFAULT']}";
   local colour="${colours[${upper}]:-\033[31m}";
 
-  local std_line="${colour}${date} [${upper}] ${0}: ${line}${norm}";
+  local std_line;
+  if [ "${debug_level}" -le 1 ]; then
+    std_line="${colour}${date} [${upper}] ${line}${norm}";
+  elif [ "${debug_level}" -ge 2 ]; then
+    std_line="${colour}${date} [${upper}] ${0}: ${line}${norm}";
+  fi;
 
   # Standard Output (Pretty)
   case "${level}" in
@@ -118,7 +123,7 @@ function log() {
       ;;
     'error')
       echo -e "${std_line}" >&2;
-      if [ "${debug_level}" -gt 0 ]; then
+      if [ "${debug_level}" -gt 1 ]; then
         echo -e "Here's a shell to debug with. 'exit 0' to continue. Other exit codes will abort - parent shell will terminate.";
         bash || exit "${?}";
       fi;

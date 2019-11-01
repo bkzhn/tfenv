@@ -2,9 +2,9 @@
 
 set -uo pipefail;
 
-if [ -n "${TFENV_DEBUG:-""}" ]; then
-  [ -n "${DEBUG:=""}" ] || export DEBUG="${TFENV_DEBUG}";
-  if [[ "${TFENV_DEBUG}" -gt 1 ]]; then
+if [ "${TFENV_DEBUG:-0}" -gt 0 ]; then
+  [ "${DEBUG:-0}" -gt "${TFENV_DEBUG:-0}" ] || export DEBUG="${TFENV_DEBUG:-0}";
+  if [[ "${TFENV_DEBUG}" -gt 2 ]]; then
     export PS4='+ [${BASH_SOURCE##*/}:${LINENO}] ';
     set -x;
   fi;
