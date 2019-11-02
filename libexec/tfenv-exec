@@ -46,7 +46,12 @@ fi;
 log 'debug' 'Getting version from tfenv-version-name';
 TFENV_VERSION="$(tfenv-version-name | tail -n1)" \
   && log 'debug' "TFENV_VERSION is ${TFENV_VERSION}" \
-  || log 'error' 'Failed to get version from tfenv-version-name';
+  || {
+    # Errors will be logged from tfenv-version name,
+    # we don't need to trouble STDERR with repeat information here
+    log 'debug' 'Failed to get version from tfenv-version-name';
+    exit 1;
+  };
 export TFENV_VERSION;
 
 TF_BIN_PATH="${TFENV_ROOT}/versions/${TFENV_VERSION}/terraform";

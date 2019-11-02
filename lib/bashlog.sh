@@ -118,7 +118,9 @@ function log() {
       ;;
     'debug')
       if [ "${debug_level}" -gt 0 ]; then
-        echo -e "${std_line}";
+        # We are debugging to STDERR on purpose
+        # tfenv relies on STDOUT between libexecs to function
+        echo -e "${std_line}" >&2;
       fi;
       ;;
     'error')

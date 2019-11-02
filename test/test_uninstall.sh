@@ -7,21 +7,21 @@ if [ -n "${TFENV_ROOT:-""}" ]; then
   if [ "${TFENV_DEBUG:-0}" -gt 1 ]; then
     [ -n "${TFENV_HELPERS:-""}" ] \
       && log 'debug' "TFENV_ROOT already defined as ${TFENV_ROOT}" \
-      || echo "[DEBUG] TFENV_ROOT already defined as ${TFENV_ROOT}";
+      || echo "[DEBUG] TFENV_ROOT already defined as ${TFENV_ROOT}" >&2;
   fi;
 else
   export TFENV_ROOT="$(cd "$(dirname "${0}")/.." && pwd)";
   if [ "${TFENV_DEBUG:-0}" -gt 1 ]; then
     [ -n "${TFENV_HELPERS:-""}" ] \
       && log 'debug' "TFENV_ROOT declared as ${TFENV_ROOT}" \
-      || echo "[DEBUG] TFENV_ROOT declared as ${TFENV_ROOT}";
+      || echo "[DEBUG] TFENV_ROOT declared as ${TFENV_ROOT}" >&2;
   fi;
 fi;
 
 if [ -n "${TFENV_HELPERS:-""}" ]; then
   log 'debug' 'TFENV_HELPERS is set, not sourcing helpers again';
 else
-  [ "${TFENV_DEBUG:-0}" -gt 1 ] && echo "[DEBUG] Sourcing helpers from ${TFENV_ROOT}/lib/helpers.sh";
+  [ "${TFENV_DEBUG:-0}" -gt 1 ] && echo "[DEBUG] Sourcing helpers from ${TFENV_ROOT}/lib/helpers.sh" >&2;
   if source "${TFENV_ROOT}/lib/helpers.sh"; then
     log 'debug' 'Helpers sourced successfully';
   else
@@ -30,57 +30,47 @@ else
   fi;
 fi;
 
-declare -a errors
+declare -a errors=();
 
 function error_and_proceed() {
   errors+=("${1}");
-  log 'warn' "tfenv: ${0}: Test Failed: ${1}";
+  log 'warn' "Test Failed: ${1}";
+};
+
+function test_uninstall() {
+  local k="${1}";
+  local v="${2}";
+  tfenv install "${v}" || return 1;
+  tfenv uninstall "${v}" || return 1;
+  log 'info' 'Confirming uninstall success; an error indicates success:';
+  check_version "${v}" && return 1 || return 0;
 }
 
-echo "### Uninstall local versions"
-cleanup || log 'error' "Cleanup failed?!"
+log 'info' '### Test Suite: Uninstall Local Versions'
+cleanup || log 'error' "Cleanup failed?!";
 
-v="0.11.15-oci"
-(
-  tfenv install "${v}" || exit 1
-  tfenv uninstall "${v}" || exit 1
-  check_version "${v}" && exit 1 || exit 0
-) || error_and_proceed "Uninstall of version "${v}" failed"
+declare -A tests;
+tests["0.9.1"]="0.9.1";
+tests["0.11.15-oci"]="0.11.15-oci";
+tests["latest"]="$(tfenv list-remote | head -n1)";
+tests["latest:^0.8"]="$(tfenv list-remote | grep -e "^0.8" | head -n1)";
 
-v="0.9.1"
-(
-  tfenv install "${v}" || exit 1
-  tfenv uninstall "${v}" || exit 1
-  check_version "${v}" && exit 1 || exit 0
-) || error_and_proceed "Uninstall of version "${v}" failed"
-
-echo "### Uninstall latest version"
-cleanup || log 'error' "Cleanup failed?!"
-
-v="$(tfenv list-remote | head -n 1)"
-(
-  tfenv install latest || exit 1
-  tfenv uninstall latest || exit 1
-  check_version "${v}" && exit 1 || exit 0
-) || error_and_proceed "Uninstalling latest version ${v}"
-
-echo "### Uninstall latest version with Regex"
-cleanup || log 'error' "Cleanup failed?!"
-
-v="$(tfenv list-remote | grep 0.8 | head -n 1)"
-(
-  tfenv install latest:^0.8 || exit 1
-  tfenv uninstall latest:^0.8 || exit 1
-  check_version "${v}" && exit 1 || exit 0
-) || error_and_proceed "Uninstalling latest version "${v}" with Regex"
+test_num=1;
+for k in "${!tests[@]}"; do
+  log 'info' "Test ${test_num}/${#tests[@]}: Testing uninstall of version ${tests[${k}]} via keyword ${k}";
+  test_uninstall "${k}" "${tests[${k}]}" \
+    && log info "Test uninstall of version ${tests[${k}]} succeeded" \
+    || error_and_proceed "Test uninstall of version ${tests[${k}]} failed";
+  test_num+=1;
+done;
 
 if [ "${#errors[@]}" -gt 0 ]; then
-  echo -e "===== The following list tests failed =====" >&2
+  log 'warn' "===== The following list tests failed =====" >&2;
   for error in "${errors[@]}"; do
-    echo -e "\t${error}"
-  done
-  exit 1
+    log 'warn' "\t${error}";
+  done;
+  log 'error' 'List test failure(s)';
 else
-  echo -e "All list tests passed."
+  log 'info' 'All list tests passed.';
 fi;
-exit 0
+exit 0;
