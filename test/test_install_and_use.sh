@@ -1,8 +1,34 @@
 #!/usr/bin/env bash
 
+set -uo pipefail;
+
 # Ensure we can execute standalone
-[ -n "${TFENV_ROOT}" ] || export TFENV_ROOT="$(cd "$(dirname "${0}")/.." && pwd)";
-[ -n "${TFENV_HELPERS}" ] || source "${TFENV_ROOT}/lib/helpers.sh";
+if [ -n "${TFENV_ROOT:-""}" ]; then
+  if [ "${TFENV_DEBUG:-0}" -gt 1 ]; then
+    [ -n "${TFENV_HELPERS:-""}" ] \
+      && log 'debug' "TFENV_ROOT already defined as ${TFENV_ROOT}" \
+      || echo "[DEBUG] TFENV_ROOT already defined as ${TFENV_ROOT}";
+  fi;
+else
+  export TFENV_ROOT="$(cd "$(dirname "${0}")/.." && pwd)";
+  if [ "${TFENV_DEBUG:-0}" -gt 1 ]; then
+    [ -n "${TFENV_HELPERS:-""}" ] \
+      && log 'debug' "TFENV_ROOT declared as ${TFENV_ROOT}" \
+      || echo "[DEBUG] TFENV_ROOT declared as ${TFENV_ROOT}";
+  fi;
+fi;
+
+if [ -n "${TFENV_HELPERS:-""}" ]; then
+  log 'debug' 'TFENV_HELPERS is set, not sourcing helpers again';
+else
+  [ "${TFENV_DEBUG:-0}" -gt 1 ] && echo "[DEBUG] Sourcing helpers from ${TFENV_ROOT}/lib/helpers.sh";
+  if source "${TFENV_ROOT}/lib/helpers.sh"; then
+    log 'debug' 'Helpers sourced successfully';
+  else
+    echo "[ERROR] Failed to source helpers from ${TFENV_ROOT}/lib/helpers.sh" >&2;
+    exit 1;
+  fi;
+fi;
 
 declare -a errors;
 

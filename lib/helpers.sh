@@ -15,25 +15,33 @@ source "${TFENV_ROOT}/lib/bashlog.sh";
 
 # Curl wrapper to switch TLS option for each OS
 function curlw () {
-  local TLS_OPT="--tlsv1.2"
+  local TLS_OPT="--tlsv1.2";
 
   # Check if curl is 10.12.6 or above
   if [[ -n "$(command -v sw_vers 2>/dev/null)" && ("$(sw_vers)" =~ 10\.12\.([6-9]|[0-9]{2}) || "$(sw_vers)" =~ 10\.1[3-9]) ]]; then
-    TLS_OPT=""
-  fi
+    TLS_OPT="";
+  fi;
 
-  curl ${TLS_OPT} "$@"
+  curl ${TLS_OPT} "$@";
 }
+export -f curlw;
 
 check_version() {
-  v="${1}"
-  [ -n "$(terraform --version | grep -E "^Terraform v${v}((-dev)|( \([a-f0-9]+\)))?$")" ]
+  v="${1}";
+  [ -n "$(terraform --version | grep -E "^Terraform v${v}((-dev)|( \([a-f0-9]+\)))?$")" ];
 }
+export -f check_version;
 
 cleanup() {
-  rm -rf ./versions
-  rm -rf ./.terraform-version
-  rm -rf ./min_required.tf
-}
+  log 'info' 'Performing cleanup';
+  local pwd="$(pwd)";
+  log 'debug' "Deleting ${pwd}/versions";
+  rm -rf ./versions;
+  log 'debug' "Deleting ${pwd}/.terraform-version";
+  rm -rf ./.terraform-version;
+  log 'debug' "Deleting ${pwd}/min_required.tf";
+  rm -rf ./min_required.tf;
+};
+export -f cleanup;
 
 export TFENV_HELPERS=1;

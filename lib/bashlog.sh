@@ -126,6 +126,8 @@ function log() {
       if [ "${debug_level}" -gt 1 ]; then
         echo -e "Here's a shell to debug with. 'exit 0' to continue. Other exit codes will abort - parent shell will terminate.";
         bash || exit "${?}";
+      else
+        exit 1;
       fi;
       ;;
     *)
